@@ -1,40 +1,29 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(dynamic_tutorials)
 
-find_package(catkin REQUIRED COMPONENTS
-  dynamic_reconfigure
-  roscpp
-)
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-generate_dynamic_reconfigure_options(
-  cfg/tutorials.cfg
- )
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(std_msgs REQUIRED)
 
 
-###########
-## Build ##
-###########
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-)
-
+include_directories(include)
 
 add_executable(${PROJECT_NAME}_node src/server.cpp)
 
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_gencfg)
-
-target_link_libraries(${PROJECT_NAME}_node
-   ${catkin_LIBRARIES}
- )
-
+ament_target_dependencies(${PROJECT_NAME}_node rclcpp std_msgs)
 
 #############
 ## Install ##
 #############
 
 install(TARGETS ${PROJECT_NAME}_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION lib/${PROJECT_NAME}
 )
+
+ament_package()

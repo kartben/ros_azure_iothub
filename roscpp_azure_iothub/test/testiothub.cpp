@@ -50,7 +50,7 @@ bool SetDeviceTwin(const char *update_device_twin_json)
 TEST(IOTHubTester, ReconfigurationTest)
 {
     // Update device twin with the new value for str_param
-    string expectedStr = "ROS_AZURE_IOT_HUB_RECONFIGURATION_TEST_" + std::to_string(ros::Time::now().toSec());
+    string expectedStr = "AzureIoTHubNode_RECONFIGURATION_TEST_" + std::to_string(ros::Time::now().toSec());
     string updateJson = "{\"properties\":{\"desired\":{\"ros_dynamic_configurations\":{\"0\":{ \"node\":\"/dynamic_tutorials_node\",\"param\": \"str_param\",\"value\":\"" + expectedStr + "\",\"type\":\"string\"}}}}}";
     EXPECT_TRUE(SetDeviceTwin(updateJson.c_str()));
 
@@ -80,7 +80,7 @@ TEST(IOTHubTester, ReconfigurationTest)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    ros::init(argc, argv, "azure_iot_hub_test");
+    ros::init(argc, argv, "DYNAMIC_TUTORIAL_test");
 
     ros::NodeHandle nh("~");
     nh.getParam("iot_hub_connection_string", connectionString);

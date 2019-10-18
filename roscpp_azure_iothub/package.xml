@@ -12,12 +12,9 @@
   <author>Vincent Tam</author>
   <license>MIT</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
-  <depend>topic_tools</depend>
-  <depend>ros_type_introspection</depend>
   <depend>libazure-iot-sdk-c</depend>
-  <test_depend>rosunit</test_depend>
 </package>

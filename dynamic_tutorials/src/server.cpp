@@ -1,26 +1,80 @@
-#include <ros/ros.h>
+#include <memory>
+#include <vector>
 
-#include <dynamic_reconfigure/server.h>
-#include <dynamic_tutorials/tutorialsConfig.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/node.hpp"
 
-void callback(dynamic_tutorials::tutorialsConfig &config, uint32_t level) {
-  ROS_INFO("Reconfigure Request: %d %f %s %s", 
-            config.int_param, config.double_param, 
-            config.str_param.c_str(), 
-            config.bool_param?"True":"False");
-}
+#include "rclcpp_components/register_node_macro.hpp"
+#include "dynamic_tutorials/visibility_control.h"
 
-int main(int argc, char **argv) 
+namespace DYNAMIC_TUTORIAL
 {
-  ros::init(argc, argv, "dynamic_tutorials_node");
+class DynamicTutorialNode : public rclcpp::Node
+{
+public:
+  DynamicTutorialNode()
+  : Node("dynamic_tutorial_node")
+  {
+    setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+    auto param_change_callback =
+      [this](std::vector<rclcpp::Parameter> parameters)
+      {
+        auto result = rcl_interfaces::msg::SetParametersResult();
+        result.successful = true;
+        for (auto parameter : parameters) {
+          rclcpp::ParameterType parameter_type = parameter.get_type();
+          if (rclcpp::ParameterType::PARAMETER_NOT_SET == parameter_type) {
+            RCLCPP_INFO(this->get_logger(),
+              "parameter '%s' deleted successfully",
+              parameter.get_name().c_str()
+            );
+            result.successful &= true;
+          } else if (rclcpp::ParameterType::PARAMETER_INTEGER == parameter_type) {
+            if (parameter.as_int() % 2 != 0) {
+              RCLCPP_INFO(this->get_logger(),
+                "Requested value '%d' for parameter '%s' is not an even number:"
+                " rejecting change...",
+                parameter.as_int(),
+                parameter.get_name().c_str()
+              );
+              result.successful = false;
+            } else {
+              RCLCPP_INFO(this->get_logger(),
+                "parameter '%s' has changed and is now: %s",
+                parameter.get_name().c_str(),
+                parameter.value_to_string().c_str()
+              );
+              result.successful &= true;
+            }
+          } else {
+            RCLCPP_INFO(this->get_logger(),
+              "only integer parameters can be set\n"
+              "requested value for parameter '%s' is not an even number, rejecting change...",
+              parameter.get_name().c_str()
+            );
+            result.successful = false;
+          }
+        }
+        return result;
+      };
 
-  dynamic_reconfigure::Server<dynamic_tutorials::tutorialsConfig> server;
-  dynamic_reconfigure::Server<dynamic_tutorials::tutorialsConfig>::CallbackType f;
+    // callback_handler needs to be alive to keep the callback functional
+    this->set_on_parameters_set_callback(param_change_callback);
+  }
+};
 
-  f = boost::bind(&callback, _1, _2);
-  server.setCallback(f);
+}  // namespace DYNAMIC_TUTORIAL
 
-  ROS_INFO("Spinning node");
-  ros::spin();
+int main(int argc, char ** argv)
+{
+  // Force flush of the stdout buffer.
+  setvbuf(stdout, NULL, _IONBF, BUFSIZ);
+
+  rclcpp::init(argc, argv);
+
+  auto node = std::make_shared<DYNAMIC_TUTORIAL::DynamicTutorialNode>();
+
+  rclcpp::spin(node);
+  rclcpp::shutdown();
   return 0;
 }
