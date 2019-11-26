@@ -351,21 +351,21 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 
             if (strcmp(type, "string") == 0)
             {
-                rclcpp::Parameter param(param, value);
-                NodeToParameterMap[node].push_back(param);
+                rclcpp::Parameter p(param, value);
+                NodeToParameterMap[node].push_back(p);
 
             }
             else if (strcmp(type, "int") == 0)
             {
                 char* end = NULL;
-                rclcpp::Parameter param(param, (int)strtol(value, &end, 10));
-                NodeToParameterMap[node].push_back(param);
+                rclcpp::Parameter p(param, (int)strtol(value, &end, 10));
+                NodeToParameterMap[node].push_back(p);
             }
             else if (strcmp(type, "double") == 0)
             {
                 char* end = NULL;
-                rclcpp::Parameter param(param, (double)strtod(value, &end));
-                NodeToParameterMap[node].push_back(param);
+                rclcpp::Parameter p(param, (double)strtod(value, &end));
+                NodeToParameterMap[node].push_back(p);
             }
             else if (strcmp(type, "bool") == 0)
             {
